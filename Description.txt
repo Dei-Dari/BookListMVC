@@ -1,0 +1,134 @@
+﻿
+BookListMVC
+
+CRUD-операции
+--------------
+
+Веб приложение ASP.NET Core 3.1 (Модель-Представление-контроллер)
+
+--------------
+
+// https://www.youtube.com/embed/C5cnZ-gZy2I
+
+Контроллеры: логичские модели
+Модели: данные
+Представление: компонент пользовательского интерфейса
+
+Отличие от Razor Pages - Stsrtsp.cs:
+services.AddControllersWithViews()
+app.UseEndpoints  указана карта маршрутизации endpoints.MapControllerRoute
+
+имя контроллера совпадает с именем папки представления
+внутри контроллера - действия IActionResult
+
+любая таблица с данными - соответствующий класс в Модели
+модели просмотра - комбинации нескольких моделей
+
+--------------
+
+MVC Routing (маршрутизация)
+
+маршруизация ASP.NET - сопоставление с образцом (входящий запрос с контроллером)
+механизм маршрутизации получает запрос во время выполнения, сопоставляет запрос с url шаблон в таблице маршрутов,
+если совпадение есть, переводит в контроллер, иначе 404
+основное в проекте уже настроено:
+Stsrtsp.cs добавляет контроллеры services.AddControllersWithViews()
+промежуточное ПО использует маршрутизацию приложения app.UseRouting() точка входа, и конечный точки app.UseEndpoints()
+маршрутизация часть ASP.NET -> маршрутизаци доступна для промежуточного ПО
+
+ASP.NET Core Teck Stack
+
+ASP.NET поддерживает тругие технологии:
+MVC
+Razor Pages
+SignalR
+используют стек промежуточного ПО, регистрируя конечные точки
+
+--------------
+
+Модель книги
+Models -> class Book
+определить свойства
+
+--------------
+
+Книгу необходимо добавить в БД, для этого добавить контекст БД, который будет также использоваться для любых таблиц
+Models -> class ApplicationDbConext
++ Microsoft.EntityFrameworkCore 3.0.0
+
+--------------
+
+Срока подключения БД
+appsettings.json
+настроить службы в Stsrtsp.cs:
+ConfigureServices()
++ BookListMVC.Models
++ Microsoft.EntityFrameworkCore.SqlServer (3.0.0)
++ Microsoft.EntityFrameworkCore
+Razor компилятор во время выполнения в ConfigureServices()
++ Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation (3.0.0) 
+
+--------------
+
+Миграция
+необходимы инструменты EntityFramework
++ Microsoft.EntityFrameworkCore.Tools (3.0.0)
+Средства -> Консоль управления пакетами
+добавить миграции (имя миграции)
+add-migration AddBookToDb 
+
+обновление БД, чтобы передать модель книги, сначала создается БД, если ее нет, и передается модель книги
+update-database
+
+--------------
+
+Главная страница - макет
+Views -> Shared
+_Layout.cshtml
+добавить ссылки на контроллер для книг asp-controller="Books" asp-action="Index"
+добавить контроллер Controllers -> controller Empty MVC Controller -> BooksController
+добавить представление Models -> Books или из контроллера по готовому шаблону
+в контроллере IActionResult Index() правой кнопкой по index -> добавить представление -> представление Razor Page
+-> использовать страницу _Layout
+
+--------------
+
+Sweet Alert
+приятные оповещения
+добавить ссылки на CSS и JS в _Layout.cshtml
+
+--------------
+
+Java Script для таблиц
+методы действия в контроллере BooksController.cs
+также через API
++ BookListMVC.Models
++ Microsoft.EntityFrameworkCore
+
+добавить js
+wwwroot -> js -> новый элемент java script -> bookList.js
+url Books/GetAll
+/Books/Upsert
+/Books/Delete
+
+--------------
+
+добавить таблицу в Books - Index.cshtml
+модель не нужна, загрузка с помощью таблиц
+
+--------------
+
+Update Insert
+
+BooksController.cs
+добавить метод Upsert  и книгу по связке Bind
+IActionResult Upsert, правой кнопкой добавить предстваление как с Index
+модель - список книг @model BookListMVC.Models.Book
+
+--------------
+
+создание книги
+
+BooksController.cs
+добавить метод Upsert с записью, отметить HTTP Post
+ValidateAntiForgeryToken для защиты от подделки, встроенная защиты от атак
